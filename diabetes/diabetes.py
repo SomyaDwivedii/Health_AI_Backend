@@ -6,11 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import ExtraTreesClassifier
 from imblearn.over_sampling import SMOTE
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, classification_report
-
-# Load and preprocess the data
+# Load and preprocess the data (similar to your original script)
 df = pd.read_csv('diabetes.csv')
 
 # Data preprocessing steps
@@ -27,17 +23,14 @@ for column in columns_non_nol:
 X = df1.drop(['Outcome'], axis=1)
 y = df1['Outcome']
 
-# Split the data before applying SMOTE
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Scaling - fit only on training data to prevent data leakage
+# Scaling
+features_to_scale = X.columns
 scaler = MinMaxScaler(feature_range=(0, 1))
-X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
-X_test_scaled = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns)
+X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
 
-# SMOTE for balancing - apply only to training data
+# SMOTE for balancing
 smote = SMOTE(random_state=42)
-X_train_resampled, y_train_resampled = smote.fit_resample(X_train_scaled, y_train)
+X_resampled, y_resampled = smote.fit_resample(X_scaled, y)
 
 # Train the model
 et = ExtraTreesClassifier(
@@ -48,35 +41,7 @@ et = ExtraTreesClassifier(
     bootstrap=False, 
     criterion='entropy'
 )
-et.fit(X_train_resampled, y_train_resampled)
-
-# Make predictions on the test set
-y_pred = et.predict(X_test_scaled)
-
-# Calculate metrics
-accuracy = accuracy_score(y_test, y_pred)
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred)
-
-# Print detailed classification report
-print("\nClassification Report:")
-print(classification_report(y_test, y_pred))
-
-# Display metrics
-print(f"Accuracy: {accuracy:.4f}")
-print(f"Precision: {precision:.4f}")
-print(f"Recall: {recall:.4f}")
-print(f"F1 Score: {f1:.4f}")
-
-# Generate and plot confusion matrix
-cm = confusion_matrix(y_test, y_pred)
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
-plt.title('Confusion Matrix')
-plt.ylabel('Actual')
-plt.xlabel('Predicted')
-plt.show()
+et.fit(X_resampled, y_resampled)
 
 # Save the model
 with open('diabetes_model.pkl', 'wb') as model_file:

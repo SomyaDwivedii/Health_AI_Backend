@@ -149,7 +149,6 @@ __pypackages__/
 # Celery stuff
 celerybeat-schedule
 celerybeat.pid
-
 # SageMath parsed files
 *.sage.py
 
@@ -390,3 +389,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/react,macos,windows,flask,python,virtualenv,visualstudiocode
+
+
+.idx
